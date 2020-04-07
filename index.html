@@ -97,6 +97,8 @@
         font-family: "Graphik Bold";
       }
 
+
+
       .label-text {
         fill: white;
         text-anchor: middle;
@@ -136,6 +138,13 @@
 
       .funding-hover-info.title {
         font-size: 12px;
+        font-family: "Graphik Bold";
+      }
+
+            .productivity-label-text {
+        fill: #8b8b8b;
+        text-anchor: middle;
+        font-size: 8px;
         font-family: "Graphik Bold";
       }
 
@@ -471,7 +480,11 @@
         z-index: 1;
       }
 
-      #button-16 {
+            #button-16 {
+        display: none;
+      }
+
+      #button-17 {
         display: none;
       }
 
@@ -496,11 +509,11 @@
       }
 
       #button-17 .knobs:before {
-        content: "Startups";
+        content: "Productivity";
         position: absolute;
         top: 4px;
         left: 4px;
-        width: 60px;
+        width: 80px;
         height: 10px;
         color: #fff;
         font-size: 10px;
@@ -516,8 +529,8 @@
       }
 
       #button-17 .checkbox:checked + .knobs:before {
-        content: "Competitors";
-        left: 46px;
+        content: "Procrastination";
+        left: 26px;
         background-color: #ea3b66;
       }
 
@@ -1221,8 +1234,14 @@
 </div>
     <div id="chart-container"></div>
     <div id="control-container">      
+          <div>
+          <div>
+            <div class="button b2" id="button-17">
+              <input type="checkbox" class="checkbox" />
+              <div class="knobs"></div>
+              <div class="layer"></div>
     </div>
-
+  <div>
 
 
     <script>
@@ -1232,7 +1251,7 @@
           outerRadius = 300,
           keySize = 10,
           keySpacing = 10,
-          radial = "maturity",
+          radial = "productivity",
           animationDuration = 2000,
           keyWidth = 160,
           keyHeight = 260,
@@ -1357,7 +1376,7 @@
               console.log(data)
 
               spinner.stop();
-              d3.select("#button-16").style("display", "block")
+              d3.select("#button-17").style("display", "block")
               d3.select(".dropdown-industry").style("display", "inline-block")
               d3.select("#save-button").style("display", "block")
               d3.select(".chart-title").style("display", "")
@@ -1393,24 +1412,61 @@
   
             var colors = ["#D75059", "#82D4BB", "#388659"];
   
+              var count_by_productivity = d3
+              .nest()
+              .key(function(d) {
+                return d["Productivity"];
+              })
+              .sortKeys(d3.ascending)
+  
+              .entries(data);
+  
+            var count_by_procrastination = d3
+              .nest()
+              .key(function(d) {
+                return d["Procrastination"];
+              })
+              .sortKeys(d3.ascending)
+              .rollup(function(v) {
+                return v.length;
+              })
+              .entries(data);
 
 
   
   
-            var maturity_list = [
-              { name: "", inner: 50, outer: 300 }
+            
+            var productivity_list = [
+              { name: "1", inner: 50, outer: 140 },
+              { name: "2", inner: 140, outer: 220 },
+              { name: "3", inner: 220, outer: 300 }
             ];
+            var procrastination_list = [
+              { name: "1", inner: 50, outer: 140 },
+              { name: "2", inner: 140, outer: 220 },
+              { name: "3", inner: 220, outer: 300 }
+            ];
+            
   
             var backgroundArc = d3
               .arc()
-              .innerRadius(maturity_list[0].inner)
-              .outerRadius(maturity_list[0].outer);
+              .innerRadius(productivity_list[0].inner)
+              .outerRadius(productivity_list[2].outer);
   
-            var existingArc = d3
+            var productivity1Arc = d3
               .arc()
-              .innerRadius(maturity_list[0].inner)
-              .outerRadius(maturity_list[0].outer);
+              .innerRadius(productivity_list[0].inner)
+              .outerRadius(productivity_list[0].outer);
 
+            var productivity2Arc = d3
+              .arc()
+              .innerRadius(productivity_list[1].inner)
+              .outerRadius(productivity_list[1].outer);
+  
+            var productivity3Arc = d3
+              .arc()
+              .innerRadius(productivity_list[2].inner)
+              .outerRadius(productivity_list[2].outer);
   
             var themeArc = d3
               .arc()
@@ -1449,7 +1505,7 @@
               .style("opacity", 0)
               .attr("d", backgroundArc);
   
-            maturity_list.forEach(function(v) {
+            productivity_list.forEach(function(v) {
               var tmpArc = d3
                 .arc()
                 .innerRadius(v.inner)
@@ -1598,13 +1654,160 @@
                   return d.data
                 });  
 
+            var productivity1LabelRadius = productivity_list[0].outer - 15;
+            var productivity2LabelRadius = productivity_list[1].outer - 15;
+            var productivity3LabelRadius = productivity_list[2].outer - 15;
+
+            var productivity1Label = chartSVG
+              .append("g")
+              .classed("productivity-labels", true);
+  
+            productivity1Label
+              .append("def")
+              .append("path")
+              .attr("id", "productivity-1-label-path")
+              .attr(
+                "d",
+                "m " +
+                  -productivity1LabelRadius +
+                  " 0 a 50 50 0 1 1 " +
+                  2 * productivity1LabelRadius +
+                  " 0"
+              );
+  
+            productivity1Label
+              .append("text")
+              .attr("class", "productivity-label-text")
+              .attr("id", "productivity-1-label-path-text")
+              .append("textPath")
+              .attr("xlink:href", "#productivity-1-label-path")
+              .attr("startOffset", "50%")
+              .text("Productivity 1");
+
+              productivity1Label
+              .append("text")
+              .attr("class", "productivity-label-text")
+              .attr("id", "procrastination-1-label-path-text")
+              .append("textPath")
+              .attr("xlink:href", "#productivity-1-label-path")
+              .attr("startOffset", "50%")
+              .text("Procrastination 1");
+  
+            var productivity2Label = chartSVG
+              .append("g")
+              .classed("productivity-labels", true);
+  
+            productivity2Label
+              .append("def")
+              .append("path")
+              .attr("id", "productivity-2-label-path")
+              .attr(
+                "d",
+                "m " +
+                  -productivity2LabelRadius +
+                  " 0 a 50 50 0 1 1 " +
+                  2 * productivity2LabelRadius +
+                  " 0"
+              );
+  
+            productivity2Label
+              .append("text")
+              .attr("class", "productivity-label-text")
+              .attr("id", "productivity-2-label-path-text")
+              .append("textPath")
+              .attr("xlink:href", "#productivity-2-label-path")
+              .attr("startOffset", "50%")
+              .text("Productivity 2");
+
+              productivity2Label
+              .append("text")
+              .attr("class", "productivity-label-text")
+              .attr("id", "procrastination-2-label-path-text")
+              .append("textPath")
+              .attr("xlink:href", "#productivity-2-label-path")
+              .attr("startOffset", "50%")
+              .text("Procrastination 2");
+  
+  
+            var productivity3Label = chartSVG
+              .append("g")
+              .classed("productivity-labels", true);
+  
+            productivity3Label
+              .append("def")
+              .append("path")
+              .attr("id", "productivity-3-label-path")
+              .attr(
+                "d",
+                "m " +
+                  -productivity3LabelRadius +
+                  " 0 a 50 50 0 1 1 " +
+                  2 * productivity3LabelRadius +
+                  " 0"
+              );
+  
+            productivity2Label
+              .append("text")
+              .attr("class", "productivity-label-text")
+              .attr("id", "productivity-3-label-path-text")
+              .append("textPath")
+              .attr("xlink:href", "#productivity-3-label-path")
+              .attr("startOffset", "50%")
+              .text("Productivity 3");
+
+            productivity2Label
+              .append("text")
+              .attr("class", "productivity-label-text")
+              .attr("id", "procrastination-3-label-path-text")
+              .append("textPath")
+              .attr("xlink:href", "#productivity-3-label-path")
+              .attr("startOffset", "50%")
+              .text("Procrastination 3");
+  
+            productivity_elements = [
+              { name: "Productivity-1", fn: productivity1Label },
+              { name: "Productivity-2", fn: productivity2Label },
+              { name: "Productivity-3", fn: productivity3Label }
+            ];
+
+            procrastination_elements = [
+              { name: "Procrastination-1", fn: productivity1Label },
+              { name: "Procrastination-2", fn: productivity2Label },
+              { name: "Procrastination-3", fn: productivity3Label }
+            ];
+  
+            procrastination_elements.forEach(function(d) {
+              var id = "#" + d.name.toLowerCase() + "-label-path-text";
+              d3.select(id).style("display", "none")
+            });
+
             var nodeData = d3
             .nest()
             .key(function(d) {
               return d["Theme"];
             })
+            .key(function(d) {
+              return d["Productivity"];
+            })
+            .rollup(function(v) {
+              return v.length;
+            })
             .entries(data);
           
+            var nodeSecondData = d3
+              .nest()
+              .key(function(d) {
+                return d["Theme"];
+              })
+              .key(function(d) {
+                return d["Procrastination"];
+              })
+              .rollup(function(v) {
+                return v.length;
+              })
+              .entries(data);
+
+
             nodeData.forEach(function(v) {
                 indexTracker[v.key] = {'slot': 1}
             })
@@ -1615,16 +1818,23 @@
                   if (
                     d["Theme"] === chartPieData[i].data.value.key
                   ) {
-                    var tmp_startAngleMin = chartPieData[i].startAngle + 0.25
-                    var tmp_endAngleMax = chartPieData[i].endAngle - 0.25
-                    tmp_innerRadiusMin = maturity_list[0].inner + 30
-                    tmp_outerRadiusMax = maturity_list[0].outer - 30
+                    var tmp_startAngleMin = chartPieData[i].startAngle + 0.05
+                    var tmp_endAngleMax = chartPieData[i].endAngle - 0.05
+                    break;
+                  }
+                }
+                for (i = 0; i < productivity_list.length; i++) {
+                  if (d["Productivity"] === productivity_list[i]["name"]) {
+                    tmp_innerRadiusMin = productivity_list[i]["inner"]
+                    tmp_outerRadiusMax = productivity_list[i]["outer"]
                     break;
                   }
                 }
 
                 for (i = 0; i < nodeData.length; i++) {
                   if (nodeData[i].key === d["Theme"]) {
+                    for (j = 0; j < nodeData[i].values.length; j++) {
+                      if (nodeData[i].values[j].key === d["Productivity"]) {
 
         
 
@@ -1636,10 +1846,10 @@
                           tmp_innerRadiusMin,
                           tmp_outerRadiusMax,
                           radiusSize,
-                          nodeData[i].values.length
+                          nodeData[i].values[j].value
                         )
 
-                        if (congestion > 10) {
+                     
                            d.results = assignRandom(
                             tmp_startAngleMin,
                             tmp_endAngleMax,
@@ -1649,17 +1859,7 @@
                             nodeList
                           );  
                           
-                        } else {
-                          d.results = assignNonRandom(
-                            d,
-                            tmp_startAngleMin,
-                            tmp_endAngleMax,
-                            tmp_innerRadiusMin,
-                            tmp_outerRadiusMax,
-                            nodeData[i].values[j]
-                          )
-                          indexTracker[d["Theme"]]["slot"] += 1
-                        }
+                        
 
 
                         /* var results = assignRandom(
@@ -1673,6 +1873,8 @@
                     
                   }
                 }
+                  }
+                }
 
                 if (d.results) {
                 d.x = d.results[0];
@@ -1684,7 +1886,63 @@
                 d.opacity = 1;
               });
 
+            var nodeSecondList = [];
+            data.forEach(function(d) {
+              for (i = 0; i < chartPieData.length; i++) {
+                if (d["Theme"] === chartPieData[i].data.value.key) {
+                  var tmp_startAngleMin = chartPieData[i].startAngle
+                  var tmp_endAngleMax = chartPieData[i].endAngle
+                  break;
+                }
+              }
+  
+              for (i = 0; i < productivity_list.length; i++) {
+                console.log(d["Procrastination"])
+                if (d["Procrastination"] === productivity_list[i].name) {
+                  tmp_innerRadiusMin = productivity_list[i]["inner"]
+                  tmp_outerRadiusMax = productivity_list[i]["outer"]
+                  console.log('tmp_innerRadiusMin', tmp_innerRadiusMin)
+                  break;
+                }
+              }
+              for (i = 0; i < nodeSecondData.length; i++) {
+                if (nodeSecondData[i].key === d["Theme"]) {
+                  for (j = 0; j < nodeSecondData[i].values.length; j++) {
+                    if (nodeSecondData[i].values[j].key === d["Procrastination"]) {
+                        var congestion = calcCongestion(
+                          tmp_startAngleMin,
+                          tmp_endAngleMax,
+                          tmp_innerRadiusMin,
+                          tmp_outerRadiusMax,
+                          radiusSize,
+                          nodeSecondData[i].values[j].value
+                        )
 
+                           d.resultsYear = assignRandom(
+                            tmp_startAngleMin,
+                            tmp_endAngleMax,
+                            tmp_innerRadiusMin,
+                            tmp_outerRadiusMax,
+                            congestion,
+                            nodeList
+                          );  
+            
+                    }
+                  }
+                }
+              }
+                if (d.resultsYear) {
+                d.yearX = d.resultsYear[0];
+                d.yearY = d.resultsYear[1];
+                } else {
+                d.yearX = 0//results[0];
+                d.yearY = 0//results[1];
+                }
+            });
+
+            d3.select("#button-17").on("change", function() {
+                switchRadial();
+              });
             var radiusSize = 2;
 
             var nodes = chartSVG
@@ -1705,16 +1963,16 @@
               })
               .attr("class", "nodes")
               .attr("x", function(d) {
-                return d.x;
+                return d.x - 15
               })
               .attr("y", function(d) {
-                return d.y;
+                return d.y - 15
               })
               .attr("xlink:href", function(d) {
                 return (d["Logo (source)"])
               })
               .attr("width", function(d) {
-                return 40
+                return 30
               })
               .on("mouseover", function(d) {
                 //nodeMouseOver(d);
@@ -1840,6 +2098,71 @@
         }
         return array;
       }
+
+            function switchRadial() {
+              if (radial === "productivity") {
+                radial = "procrastination";
+  
+                nodes
+                  .transition()
+                  .duration(animationDuration)  
+                  .attrTween("x", function(d) {
+                    var i = d3.interpolate(d.x-15, d.yearX-15);
+                    return function(t) {
+                      return i(t);
+                    };
+                  })
+                  .attrTween("y", function(d) {
+                    var i = d3.interpolate(d.y-15, d.yearY-15);
+                    return function(t) {
+                      return i(t);
+                    };
+                  });
+  
+                productivity_elements.forEach(function(d) {
+                  var id = "#" + d.name.toLowerCase() + "-label-path-text";
+                  d3.select(id).style("display", "none")
+                });
+                            procrastination_elements.forEach(function(d) {
+              var id = "#" + d.name.toLowerCase() + "-label-path-text";
+              d3.select(id).style("display", "")
+            });
+  
+
+              } else {
+                radial = "productivity";
+
+  
+                nodes
+                  .transition()
+                  .duration(animationDuration)
+                  .attrTween("x", function(d) {
+                    var i = d3.interpolate(d.yearX-15, d.x-15);
+                    return function(t) {
+                      return i(t);
+                    };
+                  })
+                  .attrTween("y", function(d) {
+                    var i = d3.interpolate(d.yearY-15, d.y-15);
+                    return function(t) {
+                      return i(t);
+                    };
+                  });
+  
+
+  
+            procrastination_elements.forEach(function(d) {
+              var id = "#" + d.name.toLowerCase() + "-label-path-text";
+              d3.select(id).style("display", "none")
+            });
+                            productivity_elements.forEach(function(d) {
+                  var id = "#" + d.name.toLowerCase() + "-label-path-text";
+                  d3.select(id).style("display", "")
+                });
+  
+
+              }
+            } 
 
 
   
@@ -2940,7 +3263,7 @@
                 Math.pow(nodeList[l][0] - tmp_x, 2) +
                   Math.pow(nodeList[l][1] - tmp_y, 2)
               );
-              if (distance <= 30) {
+              if (distance <= 8) {
                 distanceCheck = 1;
               }
             }
