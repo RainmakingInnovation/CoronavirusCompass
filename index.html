@@ -197,6 +197,17 @@
         font-size: 28px;
       }
 
+      .chart-note {
+        font-family: "Graphik Bold";
+        font-weight: bold;
+        text-anchor: middle;
+        font-size: 16px;
+      }
+
+      .note-link {
+        cursor: pointer;
+      }
+
       .key-label {
         font-family: "Graphik Regular";
         font-size: 10px;
@@ -1350,6 +1361,20 @@
           .text("Coronavirus Compass")
           .attr("y", (-height * 4.55) / 10)
           .style("display", "none")
+
+        var chartNote = chartSVG
+          .append("text")
+          .attr("class", "chart-note")
+          .html("If you want to see more of our innovation work please click this <tspan class='note-link'>link</tspan>")
+          .attr("y", (height * 4.35) / 10)
+          .style("display", "none")
+
+          d3.select(".note-link").on("click", function() {
+            window.open(
+              "https://rainmakinginnovation.github.io/Dashboard/",
+              '_blank'
+            );
+          })
   
 
   
@@ -1380,6 +1405,7 @@
               d3.select(".dropdown-industry").style("display", "inline-block")
               d3.select("#save-button").style("display", "block")
               d3.select(".chart-title").style("display", "")
+               d3.select(".chart-note").style("display", "")
 
               function modeArray(array) {
                 if (array.length == 0) return null;
