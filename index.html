@@ -198,14 +198,15 @@
       }
 
       .chart-note {
-        font-family: "Graphik Bold";
-        font-weight: bold;
+        font-family: "Graphik Regular";
+
         text-anchor: middle;
         font-size: 16px;
       }
 
       .note-link {
         cursor: pointer;
+                font-family: "Graphik Bold";
       }
 
       .key-label {
@@ -1367,7 +1368,7 @@
           .attr("class", "chart-note")
           .html("If you want to see more of our innovation work please click this <tspan class='note-link'>link</tspan>")
           .attr("y", (height * 4.35) / 10)
-          .style("display", "none")
+          //.style("display", "none")
 
           d3.select(".note-link").on("click", function() {
             window.open(
