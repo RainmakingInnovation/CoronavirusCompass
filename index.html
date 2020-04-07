@@ -1484,8 +1484,6 @@
   
             var chartPieData = chartPie(d3.entries(themeSorted));
 
-            console.log('chartPieData', chartPieData)
-
 
             themeFontData = categoryFontObject[0];
   
@@ -1682,7 +1680,7 @@
               .append("textPath")
               .attr("xlink:href", "#productivity-1-label-path")
               .attr("startOffset", "50%")
-              .text("Productivity 1");
+              .text("Superhuman");
 
               productivity1Label
               .append("text")
@@ -1691,7 +1689,7 @@
               .append("textPath")
               .attr("xlink:href", "#productivity-1-label-path")
               .attr("startOffset", "50%")
-              .text("Procrastination 1");
+              .text("Binge Worthy");
   
             var productivity2Label = chartSVG
               .append("g")
@@ -1717,7 +1715,7 @@
               .append("textPath")
               .attr("xlink:href", "#productivity-2-label-path")
               .attr("startOffset", "50%")
-              .text("Productivity 2");
+              .text("Game Changer");
 
               productivity2Label
               .append("text")
@@ -1726,7 +1724,7 @@
               .append("textPath")
               .attr("xlink:href", "#productivity-2-label-path")
               .attr("startOffset", "50%")
-              .text("Procrastination 2");
+              .text("Distracting");
   
   
             var productivity3Label = chartSVG
@@ -1753,7 +1751,7 @@
               .append("textPath")
               .attr("xlink:href", "#productivity-3-label-path")
               .attr("startOffset", "50%")
-              .text("Productivity 3");
+              .text("Supportive");
 
             productivity2Label
               .append("text")
@@ -1762,7 +1760,7 @@
               .append("textPath")
               .attr("xlink:href", "#productivity-3-label-path")
               .attr("startOffset", "50%")
-              .text("Procrastination 3");
+              .text("Enticing");
   
             productivity_elements = [
               { name: "Productivity-1", fn: productivity1Label },
@@ -1809,7 +1807,17 @@
 
 
             nodeData.forEach(function(v) {
-                indexTracker[v.key] = {'slot': 1}
+              indexTracker[v.key] = {}
+              v.values.forEach(function(w) {
+                indexTracker[v.key][w.key] = {'slot': 1}
+              })
+            })
+
+            nodeSecondData.forEach(function(v) {
+              indexTrackerYear[v.key] = {}
+              v.values.forEach(function(w) {
+                indexTrackerYear[v.key][w.key] = {'slot': 1}
+              })
             })
 
             var nodeList = [];
@@ -1836,10 +1844,6 @@
                     for (j = 0; j < nodeData[i].values.length; j++) {
                       if (nodeData[i].values[j].key === d["Productivity"]) {
 
-        
-
-                        //console.log(nodeData[i].values[j])
-
                         var congestion = calcCongestion(
                           tmp_startAngleMin,
                           tmp_endAngleMax,
@@ -1848,16 +1852,28 @@
                           radiusSize,
                           nodeData[i].values[j].value
                         )
-
-                     
+                        if (congestion > 4) {
                            d.results = assignRandom(
                             tmp_startAngleMin,
                             tmp_endAngleMax,
-                            tmp_innerRadiusMin,
-                            tmp_outerRadiusMax,
+                            tmp_innerRadiusMin+20,
+                            tmp_outerRadiusMax-20,
                             congestion,
                             nodeList
                           );  
+                        } else {
+                          d.results = assignNonRandom(d,
+                            tmp_startAngleMin,
+                            tmp_endAngleMax,
+                            tmp_innerRadiusMin,
+                            tmp_outerRadiusMax+30,
+                            nodeData[i].values[j])
+                            indexTracker[d["Theme"]][d["Productivity"]]["slot"] += 1
+                        }
+                        console.log(d.results)
+
+                     
+
                           
                         
 
@@ -1897,11 +1913,11 @@
               }
   
               for (i = 0; i < productivity_list.length; i++) {
-                console.log(d["Procrastination"])
+
                 if (d["Procrastination"] === productivity_list[i].name) {
                   tmp_innerRadiusMin = productivity_list[i]["inner"]
                   tmp_outerRadiusMax = productivity_list[i]["outer"]
-                  console.log('tmp_innerRadiusMin', tmp_innerRadiusMin)
+
                   break;
                 }
               }
@@ -1918,14 +1934,26 @@
                           nodeSecondData[i].values[j].value
                         )
 
-                           d.resultsYear = assignRandom(
+                        if (congestion > 4) {
+                          d.resultsYear = assignRandom(
                             tmp_startAngleMin,
                             tmp_endAngleMax,
-                            tmp_innerRadiusMin,
-                            tmp_outerRadiusMax,
+                            tmp_innerRadiusMin+20,
+                            tmp_outerRadiusMax-20,
                             congestion,
                             nodeList
                           );  
+                        } else {
+                          d.resultsYear = assignNonRandomYear(d,
+                            tmp_startAngleMin,
+                            tmp_endAngleMax-0.05,
+                            tmp_innerRadiusMin,
+                            tmp_outerRadiusMax,
+                            nodeSecondData[i].values[j])
+                            indexTrackerYear[d["Theme"]][d["Procrastination"]]["slot"] += 1
+                        }
+
+ 
             
                     }
                   }
@@ -1951,6 +1979,7 @@
               .enter()
               .append("a")
               .attr("xlink:href", function(d) {
+                
                 return formatURL(d.Website)
               })
               .attr("target", "_blank")
@@ -1963,16 +1992,19 @@
               })
               .attr("class", "nodes")
               .attr("x", function(d) {
-                return d.x - 15
+                return d.x - 12
               })
               .attr("y", function(d) {
-                return d.y - 15
+                return d.y - 12
               })
               .attr("xlink:href", function(d) {
                 return (d["Logo (source)"])
               })
               .attr("width", function(d) {
-                return 30
+                return 24
+              })
+              .attr("height", function(d) {
+                return 24
               })
               .on("mouseover", function(d) {
                 //nodeMouseOver(d);
@@ -2107,13 +2139,13 @@
                   .transition()
                   .duration(animationDuration)  
                   .attrTween("x", function(d) {
-                    var i = d3.interpolate(d.x-15, d.yearX-15);
+                    var i = d3.interpolate(d.x-12, d.yearX-12);
                     return function(t) {
                       return i(t);
                     };
                   })
                   .attrTween("y", function(d) {
-                    var i = d3.interpolate(d.y-15, d.yearY-15);
+                    var i = d3.interpolate(d.y-12, d.yearY-12);
                     return function(t) {
                       return i(t);
                     };
@@ -2137,13 +2169,13 @@
                   .transition()
                   .duration(animationDuration)
                   .attrTween("x", function(d) {
-                    var i = d3.interpolate(d.yearX-15, d.x-15);
+                    var i = d3.interpolate(d.yearX-12, d.x-12);
                     return function(t) {
                       return i(t);
                     };
                   })
                   .attrTween("y", function(d) {
-                    var i = d3.interpolate(d.yearY-15, d.y-15);
+                    var i = d3.interpolate(d.yearY-12, d.y-12);
                     return function(t) {
                       return i(t);
                     };
@@ -2829,7 +2861,7 @@
                   }
   
                   tmp_svg.remove();
-                }, 1500 * (i + 1));
+                }, 1000 * (i + 1));
               }
             }
 
@@ -3099,7 +3131,7 @@
           tmp_endAngleMax,
           tmp_innerRadiusMin,
           tmp_outerRadiusMax,
-          radiusSize=2,
+          radiusSize=12,
           numNodes
         ) {
           // calculate area of arc
@@ -3138,7 +3170,7 @@
             loop1:
             for (let hi = 0; hi <= horizontalCuts; hi++) {
               index ++
-            if (index === indexTrackerYear[data["Opportunity space"]][data["Founded"]]["slot"]) {
+            if (index === indexTrackerYear[data["Theme"]][data["Procrastination"]]["slot"]) {
               horizontalSlot = hi
               verticalSlot = vi
               break loop0
@@ -3159,8 +3191,8 @@
 
           tmp_x = tmp_gen.centroid()[0];
           tmp_y = tmp_gen.centroid()[1];
-
           return [tmp_x, tmp_y];
+
         }
 
         function assignNonRandom(
@@ -3177,10 +3209,12 @@
             var verticalCuts = 0
                  
             for (let o = 0; o < numNodes; o++) {
-              if (o % 2 == 0) {
+              if (o % 2  == 0) {
                 horizontalCuts++
+
               } else {
-                verticalCuts++
+                
+verticalCuts++
               }
               var totalSpots = horizontalCuts * verticalCuts
               if (totalSpots > numNodes) {
@@ -3199,7 +3233,7 @@
             loop1:
             for (let hi = 0; hi <= horizontalCuts; hi++) {
               index ++
-            if (index === indexTracker[data["Opportunity space"]][data["Maturity"]]["slot"]) {
+            if (index === indexTracker[data["Theme"]][data["Productivity"]]["slot"]) {
               horizontalSlot = hi
               verticalSlot = vi
               break loop0
@@ -3235,6 +3269,7 @@
           congestion,
           nodeList
         ) {
+          
           tmp_startAngle =
             Math.random() * (tmp_endAngleMax - tmp_startAngleMin) +
             tmp_startAngleMin;
@@ -3263,7 +3298,7 @@
                 Math.pow(nodeList[l][0] - tmp_x, 2) +
                   Math.pow(nodeList[l][1] - tmp_y, 2)
               );
-              if (distance <= 8) {
+              if (distance <= 30) {
                 distanceCheck = 1;
               }
             }
