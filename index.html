@@ -1890,14 +1890,13 @@
                           );  
                         } else {
                           d.results = assignNonRandom(d,
-                            tmp_startAngleMin,
-                            tmp_endAngleMax,
+                            tmp_startAngleMin-0.05,
+                            tmp_endAngleMax-0.05,
                             tmp_innerRadiusMin,
-                            tmp_outerRadiusMax+30,
+                            tmp_outerRadiusMax-5,
                             nodeData[i].values[j])
                             indexTracker[d["Theme"]][d["Productivity"]]["slot"] += 1
                         }
-                        console.log(d.results)
 
                      
 
@@ -1961,7 +1960,7 @@
                           nodeSecondData[i].values[j].value
                         )
 
-                        if (congestion > 4) {
+                        if (congestion > 6) {
                           d.resultsYear = assignRandom(
                             tmp_startAngleMin,
                             tmp_endAngleMax,
@@ -1972,8 +1971,8 @@
                           );  
                         } else {
                           d.resultsYear = assignNonRandomYear(d,
-                            tmp_startAngleMin,
-                            tmp_endAngleMax-0.05,
+                            tmp_startAngleMin+0.05,
+                            tmp_endAngleMax+0.05,
                             tmp_innerRadiusMin,
                             tmp_outerRadiusMax,
                             nodeSecondData[i].values[j])
@@ -3229,22 +3228,10 @@
             // divide space into a grid?
             // half till ~number of nodes?
             var numNodes = nodeDataEntry.value
-            var horizontalCuts = 0
-            var verticalCuts = 0
+            var horizontalCuts = numNodes/3
+            var verticalCuts = 3
+            var totalSpots = numNodes
                  
-            for (let o = 0; o < numNodes; o++) {
-              if (o % 2  == 0) {
-                horizontalCuts++
-
-              } else {
-                
-verticalCuts++
-              }
-              var totalSpots = horizontalCuts * verticalCuts
-              if (totalSpots > numNodes) {
-                break;
-              }
-            }
 
           vertDivision = (tmp_outerRadiusMax - tmp_innerRadiusMin) / verticalCuts
           horDivision = (tmp_endAngleMax - tmp_startAngleMin) / horizontalCuts
@@ -3322,7 +3309,7 @@ verticalCuts++
                 Math.pow(nodeList[l][0] - tmp_x, 2) +
                   Math.pow(nodeList[l][1] - tmp_y, 2)
               );
-              if (distance <= 10) {
+              if (distance <= 20) {
                 distanceCheck = 1;
               }
             }
