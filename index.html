@@ -67,6 +67,13 @@
         src: local("Graphik Bold"), url("GraphikBold.woff") format("woff");
       }
 
+      @font-face {
+        font-family: "Graphik Light";
+        font-style: normal;
+        font-weight: normal;
+        src: local("Graphik Light"), url("Graphik-Light.woff") format("woff");
+      }
+
       .segment {
         stroke: white;
         stroke-width: 2px;
@@ -1204,8 +1211,8 @@
 
   .how-works {
     margin-top: 10px;
-    font-family: "Graphik Bold";
-    font-size: 12px;
+    font-family: "Graphik Light";
+    font-size: 10px;
     color: grey;
     cursor: pointer;
     display: none;
@@ -1658,7 +1665,7 @@
                   d.data.value.key.toLowerCase().replace(/ /g, "-") + "-band"
                 );
               })
-              .attr("fill", "black")
+              .attr("fill", "#c0c0c0")
               .each(function(d, i) {
                 var firstArcSection = /(^.+?)L/;
                 var newArc = firstArcSection.exec(d3.select(this).attr("d"))[1];
@@ -2670,18 +2677,19 @@
             }
 
             function showHowWorks() {
-              d3.select(".how-works-tooltip").style("opacity", 1)
+              //d3.select(".how-works-tooltip").style("opacity", 1)
+              d3.select("#opp-space-tooltip-container").style("display", "block")
 
-              d3.select(".how-works-tooltip-0").html("Why: " + context[0]["Why"])
-              d3.select(".how-works-tooltip-1").html("What: " + context[0]["What"])
-              d3.select(".how-works-tooltip-2").html("How; " + context[0]["How"])
-              d3.select(".how-works-tooltip-3").html("Guide: " + context[0]["Guide"])
-              d3.select(".how-works-tooltip-4").html("Additional, Rainmaking effort: " + context[0]["Additional, Rainmaking effort"])
+              d3.select(".opp-space-tooltip-title").text("GUIDE:")
+              d3.select("#ostt-1").html(context[0]["Guide"]).style("font-family", "Graphik Light")
+              //d3.select(".how-works-tooltip-4").html("Additional, Rainmaking effort: " + context[0]["Additional, Rainmaking effort"])
 
             }
 
             function hideHowWorks() {
-              d3.select(".how-works-tooltip").style("opacity", 0)
+              //d3.select(".how-works-tooltip").style("opacity", 0)
+              d3.select("#ostt-1").style("font-family", "Graphik Regular")
+              d3.select("#opp-space-tooltip-container").style("display", "none")
             }
 
             function showNodeTooltip(d) {
@@ -2862,7 +2870,7 @@
                   d.data.value.key.toLowerCase().replace(/ /g, "-") + "-tmp-band"
                 );
               })
-              .attr("fill", "black")
+              .attr("fill", "#c0c0c0")
               .each(function(d, i) {
                 var firstArcSection = /(^.+?)L/;
                 var newArc = firstArcSection.exec(d3.select(this).attr("d"))[1];
