@@ -215,6 +215,12 @@
                 font-family: "Graphik Bold";
       }
 
+
+      .note-link-2 {
+        cursor: pointer;
+        font-family: "Graphik Bold";
+      }
+
       .key-label {
         font-family: "Graphik Regular";
         font-size: 10px;
@@ -1611,12 +1617,26 @@
           .append("text")
           .attr("class", "chart-note")
           .html("If you want to see more of our innovation work please click this <tspan class='note-link'>link</tspan>")
-          .attr("y", (height * 4.35) / 10)
+          .attr("y", (height * 4.15) / 10)
           .style("display", "none")
 
           d3.select(".note-link").on("click", function() {
             window.open(
               "https://rainmakinginnovation.github.io/Dashboard/",
+              '_blank'
+            );
+          })
+
+          var chartNote2 = chartSVG
+          .append("text")
+          .attr("class", "chart-note")
+          .html("If you want to be included in our Compass please click this <tspan class='note-link-2'>link</tspan>")
+          .attr("y", (height * 4.40) / 10)
+          .style("display", "none")
+
+          d3.select(".note-link-2").on("click", function() {
+            window.open(
+              "https://docs.google.com/forms/d/e/1FAIpQLScaCJpZ00nzgsOhUdwB8b9t9jrGWlyLhqalKjOULvGzMCKNzQ/viewform",
               '_blank'
             );
           })
@@ -1644,9 +1664,13 @@
           "https://docs.google.com/spreadsheets/d/e/2PACX-1vR-BAWGg0c1wQ5NVrvOTEBhRqGnTJUZn8jAofUum8kVS2E-ji8rjncAZAUQJvRb5dDUbVRM1qXbgeAV/pub?gid=230578320&single=true&output=csv"
           ).then(function(context) {
 
+            console.log(data)
+
         data = data.filter(function(d) {
             return d["Include"] === "TRUE"
-          }) 
+          }).filter(function(d) {
+            return +d["Founded Year"] >= 2005
+          })
 
           console.log('desc', desc)
 
@@ -1684,6 +1708,7 @@
               //d3.select(".dropdown-client").style("display", "inline-block")
               d3.select("#save-button").style("display", "block")
               chartNote.style("display", "block")
+              chartNote2.style("display", "block")
               d3.select(".how-works").style("display", "block").on("mouseover", showHowWorks).on("mouseout", hideHowWorks)
               chartLogo.style("display", "block")
               chartTitle.style("display", "block")
@@ -2935,7 +2960,17 @@
               })
               .entries(data);
 
-  
+              var count_by_productivity = d3
+              .nest()
+              .key(function(d) {
+                return d["Productivity"];
+              })
+              .rollup(function(v) {
+                return v.length;
+              })
+              .entries(data);
+
+              console.log('count_by_productivity', count_by_productivity)
   
             var count_by_funding_stage = d3
               .nest()
@@ -4015,12 +4050,14 @@
               }
   
               for (i = 0; i < productivity_list.length; i++) {
-                if (d["Productivity"] === productivity_list[i].key) {
+                if (d["Productivity"] === productivity_list[i].name) {
                   tmp_innerRadiusMin = productivity_list[i]["inner"]
                   tmp_outerRadiusMax = productivity_list[i]["outer"]
                   break;
                 }
               }
+              console.log('tmp_innerRadiusMin', tmp_innerRadiusMin)
+              console.log('tmp_outerRadiusMax', tmp_outerRadiusMax)
               for (i = 0; i < nodeSecondData.length; i++) {
                 if (nodeSecondData[i].key.toLowerCase() === d["Theme"]) {
                   for (j = 0; j < nodeSecondData[i].values.length; j++) {
