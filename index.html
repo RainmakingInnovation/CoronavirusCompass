@@ -1672,7 +1672,6 @@
             return +d["Founded Year"] >= 2005
           })
 
-          console.log('desc', desc)
 
           var transform = d3.geoTransform({ point: projectPoint }),
             path = d3.geoPath().projection(transform);
@@ -1802,8 +1801,8 @@
             });*/
 
             
-              json.features.push({"type": "features", "properties": {"name": "Singapore"}, "geometry": {"type": "Polygon", "coordinates": [[0, 0]]}})
-              json.features.push({"type": "features", "properties": {"name": "Bahrain"}, "geometry": {"type": "Polygon", "coordinates": [[0, 0]]}})
+              //json.features.push({"type": "features", "properties": {"name": "Singapore"}, "geometry": {"type": "Polygon", "coordinates": [[0, 0]]}})
+              //json.features.push({"type": "features", "properties": {"name": "Bahrain"}, "geometry": {"type": "Polygon", "coordinates": [[0, 0]]}})
   
               d3.select("#radar-toggle-btn").on("click", function() {
                 d3.select("#map-toggle-btn").attr("class", "left-sidebar-btn")
@@ -1840,13 +1839,13 @@
                   if (d.key == v.key) {
                     return "#247DC5"
                   } else {
-                    return "#7DCCFF"
+                    return "#8ED1A1"
                   }
                 }).attr("stroke", function(v) {
                   if (d.key == v.key) {
                     return "#247DC5"
                   } else {
-                    return "#7DCCFF"
+                    return "#8ED1A1"
                   }
                 })
 
@@ -1899,23 +1898,23 @@
 
                 d3.selectAll(".country-circle")
                   .attr("fill", function(v) {
-                    if (v.properties.name === d.properties.name) {
+                    if (v.key === d.key) {
                       return "#247DC5"
                     } else {
-                      return "#7DCCFF"
+                      return "#8ED1A1"
                     }
                     
                   })
                   .attr("stroke", function(v) {
-                    if (v.properties.name === d.properties.name) {
+                    if (v.key === d.key) {
                       return "#247DC5"
                     } else {
-                      return "#7DCCFF"
+                      return "#8ED1A1"
                     }
                   });
  
-                var tooltip = "<div>" + d.properties.name + "<\/div>";
-                tooltip += "<div>Startups: " + d.properties.startups + "<\/div>";
+                var tooltip = "<div>" + d.key + "<\/div>";
+                tooltip += "<div>Startups: " + d.values.length + "<\/div>";
                 d3.select(".map-tooltip")
                   .html(tooltip)
                   .style("top", function() {
@@ -1926,11 +1925,10 @@
                   })
                   .style("display", "");
   
-                d3.select(".sidebar-title").html(d.properties.name);
+                d3.select(".sidebar-title").html(d.key);
   
                 startup_list = [];
-                data.forEach(function(w) {
-                  if (w["Country (HQ)"] === d.properties.name) {
+                d.values.forEach(function(w) {
                     var obj = {
                       "Company": w["Company"],
                       Funding: w["Funding ($)"],
@@ -1938,7 +1936,6 @@
                       "Founded Year": w["Founded Year"]
                     };
                     startup_list.push(obj);
-                  }
                 });
                 var table = "";
                 table += "<table class='startup-table'>";
@@ -2153,7 +2150,7 @@
               .append("path")
               .classed("segment-band", true)
               .attr("d", segmentLabelBandArc)
-              .attr("fill", "#7DCCFF")
+              .attr("fill", "#8ED1A1")
               .each(function(d, i) {
                 var firstArcSection = /(^.+?)L/;
                 var newArc = firstArcSection.exec(d3.select(this).attr("d"))[1];
@@ -2561,25 +2558,17 @@
                 })
                 .entries(json.features);
 
-              data.forEach(function(v) {
+              /*data.forEach(function(v) {
                 json.features.forEach(function(w) {
                   if (v["Country (HQ)"] === w.properties.name) {
                     v.json_country = w.properties.name;
                   }
                 });
+                if (v.json_country == null) {
+                  console.log('Incorrect Country Input: ', v)
+                }
               });
   
-              /*var countries = leftG
-                .selectAll(".country")
-                .data(json.features)
-                .enter()
-                .append("path")
-                .attr("d", leftPath)
-                .attr("class", "country")
-                .attr("id", function(d) {
-                  return "country_" + d.properties.name.replace(/ /g, "-");
-                })
-                .attr("fill", "#EFEFEF");*/
   
               json.features.forEach(function(w) {
                 w.properties.startups = 0;
@@ -2589,53 +2578,57 @@
                     w.properties.startups += 1;
                   }
                 });
-              });
+              });*/
   
-              var max_country = d3.max(json.features, function(w) {
-                  return w.properties.startups
+              var max_country = d3.max(data_country, function(w) {
+                  return w.values.length
               })
+
 
   
   
               var countryCircleScale = d3.scaleSqrt()
               .domain([1,max_country])
               .range([2.6, 30]);
+
+            var q = d3.queue();
+            var geocoder = L.mapbox.geocoder("mapbox.places");
+
+            data_country.forEach(function(v) {
+              q.defer(getLocation2, v);
+            })
+
+            function getLocation2(data, callback) {
+                  geocoder.query(data.key, function (error, point) {
+                    data.cityLat = point.latlng[0]
+                    data.cityLng = point.latlng[1]
+                  });
+
+              callback(null);
+            }
   
  
-              json.features = json.features.filter(function(d) {
-                return d.geometry.coordinates[0].length > 2
-              })
-
+              q.awaitAll(function (error) {
+                if (error) throw error;
+                setTimeout(function () {
                 mapG
                 .selectAll(".country-circle")
-                .data(json.features)
+                .data(data_country.filter(function(v) {
+                    return v.cityLat != null
+                  }))
                 .enter()
                 .append("circle")
                 .classed("country-circle", true)
-                .attr("r", function(d) {
-                  if (d.properties.startups > 0) {
-                    return countryCircleScale(d.properties.startups);
-                  }
+                  .attr("r", function(d) {
+                    if (d.values.length > 0) {
+                      return countryCircleScale(d.values.length)
+                    } 
                 })
-                .attr("cx", function(d, i) {
-                  let arr = d.geometry.coordinates[0]
-                  if (arr.length < 2) {
-                    arr = d.geometry.coordinates[0][0]
-                  }
-                  if (arr != [0, 0]) {
-                  return map.latLngToLayerPoint(new L.LatLng(center(arr)[1], center(arr)[0])).x
-                  }
-
+                  .attr("cx", function(d, i) {
+                  return map.latLngToLayerPoint(new L.LatLng(d.cityLat, d.cityLng)).x
                 })
                 .attr("cy", function(d, i) {
-                  let arr = d.geometry.coordinates[0]
-                  if (arr.length < 2) {
-                    arr = d.geometry.coordinates[0][0]
-                  }
-                  if (arr != [0,0]) {
-                    return map.latLngToLayerPoint(new L.LatLng(center(arr)[1], center(arr)[0])).y
-                }
-
+                    return map.latLngToLayerPoint(new L.LatLng(d.cityLat, d.cityLng)).y
                 })
                 .attr("fill", "#7DCCFF")
                 .attr("stroke", "#7DCCFF")
@@ -2644,6 +2637,9 @@
                   country_hover(d)
                 })
                 .on("click", country_click)
+
+                }, 2000);
+                });
 
               /*q.awaitAll(function (error) {
                 if (error) throw error;
@@ -2668,8 +2664,8 @@
                     return map.latLngToLayerPoint(new L.LatLng(d.cityLat, d.cityLng)).y
                 })
                 .style("cursor", "pointer")
-                .attr("fill", "#7DCCFF")
-                .attr("stroke", "#7DCCFF")
+                .attr("fill", "#8ED1A1")
+                .attr("stroke", "#8ED1A1")
                 .style("visibility", "hidden")
                 .on("mouseover", city_hover)
                 .on("click", city_click)
@@ -2711,8 +2707,8 @@
                     return "hidden"
                   }
                 })
-                .attr("fill", "#7DCCFF")
-                .attr("stroke", "#7DCCFF");
+                .attr("fill", "#8ED1A1")
+                .attr("stroke", "#8ED1A1");
 
                  mapG.selectAll(".city-circle")
                   .attr("cx", function(d, i) {
@@ -2728,8 +2724,8 @@
                     return "hidden"
                   }
                 })
-                .attr("fill", "#7DCCFF")
-                .attr("stroke", "#7DCCFF");
+                .attr("fill", "#8ED1A1")
+                .attr("stroke", "#8ED1A1");
               }
 
             map.on("zoom", function(e) {
@@ -2969,8 +2965,6 @@
                 return v.length;
               })
               .entries(data);
-
-              console.log('count_by_productivity', count_by_productivity)
   
             var count_by_funding_stage = d3
               .nest()
@@ -3323,7 +3317,7 @@
                   d.data.value.key.toLowerCase().replace(/ /g, "-") + "-band"
                 );
               })
-              .attr("fill", "#7DCCFF")
+              .attr("fill", "#8ED1A1")
               .each(function(d, i) {
                 var firstArcSection = /(^.+?)L/;
                 var newArc = firstArcSection.exec(d3.select(this).attr("d"))[1];
@@ -3356,8 +3350,6 @@
               })
               .on("mouseover", function(d) {
                 labelMouseOver(d);
-                console.log(d)
-                console.log('desc', desc)
                 showOppSpaceTooltip(d)
 
               })
@@ -4056,8 +4048,6 @@
                   break;
                 }
               }
-              console.log('tmp_innerRadiusMin', tmp_innerRadiusMin)
-              console.log('tmp_outerRadiusMax', tmp_outerRadiusMax)
               for (i = 0; i < nodeSecondData.length; i++) {
                 if (nodeSecondData[i].key.toLowerCase() === d["Theme"]) {
                   for (j = 0; j < nodeSecondData[i].values.length; j++) {
@@ -4909,7 +4899,7 @@
                       "#9368B7", "#9BC53D", "#122C34"]) */
 
                       var colorScale = d3.scaleOrdinal().domain(x.domain())
-                      .range(["#7DCCFF"])
+                      .range(["#8ED1A1"])
 
                     var barX = d3.scaleBand()
                     .domain(fundHist.map(function(d) {
@@ -5021,7 +5011,7 @@
                   "#9368B7", "#9BC53D", "#122C34"]) */
 
                   var colorScale = d3.scaleOrdinal().domain(x.domain())
-                  .range(["#7DCCFF"])
+                  .range(["#8ED1A1"])
 
                   var y = d3.scaleLinear()
                   .range([bar_height-50, 50])
@@ -5216,7 +5206,7 @@
                 .paddingInner(0.25);
 
                 var colorScale = d3.scaleOrdinal().domain(x.domain())
-                .range(["#7DCCFF"])
+                .range(["#8ED1A1"])
 
                 var y = d3.scaleLinear()
                 .range([bar_height-50, 50])
@@ -6170,7 +6160,6 @@
             }
             function save_split() {
               for (let i = 0; i < chartPieData.length; i++) {
-                console.log('chartPieData[i].data.value.key', chartPieData[i].data.value.key)
                 setTimeout(function() {
                   var selection =
                     "#background-segment-" +
@@ -6328,7 +6317,7 @@
                     .append("path")
                     .classed("segment-band", true)
                     .attr("d", segmentLabelBandArc)
-                    .attr("fill", "#7DCCFF")
+                    .attr("fill", "#8ED1A1")
   
                   var tmpLabels = tmp_chartSVG
                     .append("g")
