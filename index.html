@@ -4227,6 +4227,11 @@
                 showNodeTooltip(d)
               })
               .on("mouseout", hideNodeTooltip);
+
+              // for the overview page:
+              var a = 5;
+              window.parent.postMessage(['varA', a], '*');
+
   
             var nodes_activity = chartSVG
               .selectAll("nodes-activity")
